@@ -1,0 +1,5 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<parameters>
+  <setParameter name="IIS Web Application Name" value="Default Web Site/CustomerManagementSystemAPI" />
+  <setParameter name="DefaultConnection-Web.config Connection String" value="Data Source=G705498-W101;Initial Catalog=CRMSystem1;Integrated Security=True;MultipleActiveResultSets=True" />
+</parameters>
