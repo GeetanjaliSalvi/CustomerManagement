@@ -1,0 +1,389 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Add New Customer Information</title>
+    <link href="../Content/bootstrap.css" rel="stylesheet" />    
+    <script src="../Scripts/jquery-3.0.0.min.js"></script>
+    <script src="../Scripts/bootstrap.min.js"></script>
+    <link href="../Content/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body>
+    <form>
+        <input type="hidden" id="customerid" value="0" />
+        <div class="container">
+            <nav class="navbar navbar-expand-md navbar-light bg-light">
+                <a class="nav-item nav-link active" href="AllCustomers.html">All Customers</a>
+                <a class="nav-item nav-link" href="SearchPage.html">Search</a>
+                <a class="nav-item nav-link" href="AddCustomer.html">Add/Update Customer</a>
+            </nav>
+            <div class="row">
+                <div class="col-sm-6">
+                    <h2>New Customer</h2>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <table id="customerTable"
+                           class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>Edit</th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Phone Number</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th>Delete</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <button type="button" id="addButton"
+                            class="btn btn-primary"
+                            onclick="addClick();">
+                        Add Customer
+                    </button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            Customer Information
+                        </div>
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <label for="firstname">
+                                    First Name
+                                </label>
+                                <input required type="text"
+                                       class="form-control"
+                                       id="firstname" maxlength="100" />
+                            </div>
+                            <div class="form-group">
+                                <label for="lastname">
+                                    Last Name
+                                </label>
+                                <input required maxlength="100" type="text"
+                                       class="form-control"
+                                       id="lastname" />
+                            </div>
+                            <div class="form-group">
+                                <label for="email">
+                                    Email
+                                </label>
+                                <input type="email"
+                                       class="form-control"
+                                       id="email" required />
+                            </div>
+                            <div class="form-group">
+                                <label for="phoneNumber">
+                                    Phone Number
+                                </label>
+                                <input required maxlength="10" type="number"
+                                       class="form-control"
+                                       id="phoneNumber" />
+                            </div>
+                            <div>
+                                <label for="status">
+                                    Status
+                                </label>
+                                <input type="checkbox"
+                                       class="form-check-input" style="margin-left:20px"
+                                       id="status" />
+                            </div>
+                        </div>
+                        <div class="panel-footer">
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    <button type="submit" id="updateButton"
+                                            class="btn btn-primary"
+                                            onclick="updateClick();">
+                                        Add
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+<script>
+    $(document).ready(function() {
+        customerList();
+    });
+
+    var Customer = {
+        CustomerId: 0,
+        FirstName: "",
+        LastName: "",
+        PhoneNumber: "",
+        Email: "",
+        Status: ""
+    }
+
+    function customerGet(ctl) {
+        // Get customer id from data- attribute
+        var searchtext = $(ctl).data("id");
+
+        // Store customer id in hidden field
+        $("#customerid").val(searchtext);
+
+        // Call Web API to get a Customer
+        $.ajax({
+            url: "/CustomerManagementSystemAPI/api/GetCustomers/" + searchtext,
+            type: 'GET',
+            headers: { 'X-CustomerManagementApiKey': 'CustomerManagementX123:YesAppKeyIsPersist' },
+            dataType: 'json',
+            success: function(customer) {
+                customerToFields(customer);
+
+                // Change Update Button Text
+                $("#updateButton").text("Update");
+            },
+            error: function(request, message, error) {
+                handleException(request, message, error);
+            }
+        });
+    }
+
+    function CheckValidation() {
+        valid = true;
+        if ($("#firstname").val() == "") {
+            valid = false;
+        }
+        return valid;
+    }
+    function updateClick() {
+        if (CheckValidation() ==true) {
+            // Build customer object from inputs
+
+            Customer = new Object();
+            Customer.CustomersId = $("#customerid").val();
+            Customer.FirstName = $("#firstname").val();
+            Customer.LastName = $("#lastname").val();
+            Customer.Email = $("#email").val();
+            Customer.PhoneNumber = $("#phoneNumber").val();
+            if ($('input#status').is(':checked') == true) {
+                Customer.Status = 1;
+            } else {
+                Customer.Status = 0;
+            }
+
+            if ($("#updateButton").text().trim() == "Add") {
+                customerAdd(Customer);
+            } else {
+                customerUpdate(Customer);
+            }
+        }
+    }
+
+    function addClick() {
+        $("#updateButton").text("Add");
+        formClear();
+    }
+
+    function customerUpdate(customer) {
+        var url = "/CustomerManagementSystemAPI/api/Customer/EditCustomer";
+
+        // Call Web API to update customer
+        $.ajax({
+            url: url,
+            type: 'POST',
+            contentType: "application/json;charset=utf-8",
+            headers: { 'X-CustomerManagementApiKey': 'CustomerManagementX123:YesAppKeyIsPersist' },
+            data: JSON.stringify(customer),
+            success: function(customer) {
+                customerUpdateSuccess(customer);
+            },
+            error: function(request, message, error) {
+                handleException(request, message, error);
+            }
+        });
+    }
+
+    function customerUpdateSuccess(customer) {
+        customerUpdateInTable(customer);
+    }
+
+    function customerAdd(customer) {
+        // Call Web API to add a new customer
+        $.ajax({
+            url: "/CustomerManagementSystemAPI/api/Customer/AddCustomer",
+            type: 'POST',
+            contentType: "application/json;charset=utf-8",
+            headers: { 'X-CustomerManagementApiKey': 'CustomerManagementX123:YesAppKeyIsPersist' },
+            data: JSON.stringify(customer),
+            success: function(customer) {
+                customerAddSuccess(customer);
+            },
+            error: function(request, message, error) {
+                handleException(request, message, error);
+            }
+        });
+    }
+
+    function customerAddSuccess(customer) {
+        customerAddRow(customer);
+        formClear();
+    }
+
+    // Update customer in <table>
+    function customerUpdateInTable(customer) {
+        // Find Customer in <table>
+        var row = $("#customerTable button[data-id='" + customer.CustomersId + "']")
+            .parents("tr")[0];
+        // Add changed customer to table
+        $(row).after(customerBuildTableRow(customer));
+        // Remove original customer
+        $(row).remove();
+
+        // Clear form fields
+        formClear();
+
+        // Change Update Button Text
+        $("#updateButton").text("Add");
+    }
+
+    function customerToFields(customer) {
+        $("#customerid").val(customer.CustomersId);
+        $("#firstname").val(customer.FirstName);
+        $("#lastname").val(customer.LastName);
+        $("#email").val(customer.Email);
+        $("#phoneNumber").val(customer.PhoneNumber);
+        $("#status").val(customer.Status);
+    }
+
+    // Get all Customers to display
+    function customerList() {
+        // Call Web API to get a list of customers
+        $.ajax({
+            url: '/CustomerManagementSystemAPI/api/GetCustomers/',
+
+            type: 'GET',
+            headers: { 'X-CustomerManagementApiKey': 'CustomerManagementX123:YesAppKeyIsPersist' },
+            dataType: 'json',
+
+            success: function(customers) {
+                customerListSuccess(customers);
+            },
+            error: function(request, message, error) {
+                handleException(request, message, error);
+            }
+        });
+    }
+
+    // Display all Customers returned from Web API call
+    function customerListSuccess(customers) {
+        // Iterate over the collection of data
+        $.each(customers,
+            function(index, customer) {
+                // Add a row to the Customer table
+                customerAddRow(customer);
+            });
+    }
+
+    // Add Customer row to <table>
+    function customerAddRow(customer) {
+        // First check if a <tbody> tag exists, add one if not
+        if ($("#customerTable tbody").length == 0) {
+            $("#customerTable").append("<tbody></tbody>");
+        }
+
+        // Append row to <table>
+        $("#customerTable tbody").append(
+            customerBuildTableRow(customer));
+    }
+
+    // Build a <tr> for a row of table data
+    function customerBuildTableRow(customer) {
+        var ret = "<tr>" +
+            "<td>" +
+            "<button type='button' " +
+            "onclick='customerGet(this);' " +
+            "class='btn btn-default' " +
+            "data-id='" +
+            customer.CustomersId +
+            "'>" +
+            "<span class='glyphicon glyphicon-edit'>Edit</span>" +
+            "</button>" +
+            "</td>" +
+            "<td>" +
+            customer.FirstName +
+            "</td>" +
+            "<td>" +
+            customer.LastName +
+            "</td>" +
+            "<td>" +
+            customer.PhoneNumber +
+            "</td>" +
+            "<td>" +
+            customer.Email +
+            "</td>";
+        if (customer.IsActive) {
+            ret = ret + "<td><input type=\"checkbox\" checked disabled></td>";
+        } else
+            ret = ret + "<td><input type=\"checkbox\" disabled></td>";
+        ret = ret +
+            "<td>" +
+            "<button type='button' " +
+            "onclick='customerDelete(this);' " +
+            "class='btn btn-default' " +
+            "data-id='" +
+            customer.CustomersId +
+            "'>" +
+            "<span class='glyphicon glyphicon-remove'>Delete</span>" +
+            "</button>" +
+            "</td>";
+        ret = ret + "</tr>";
+        return ret;
+
+    }
+
+    // Delete customer from <table>
+    function customerDelete(ctl) {
+        var id = $(ctl).data("id");
+
+        // Call Web API to delete a customer
+        $.ajax({
+            url: "/CustomerManagementSystemAPI/api/Customer/DeleteCustomer/" + id,
+            type: 'POST',
+            headers: { 'X-CustomerManagementApiKey': 'CustomerManagementX123:YesAppKeyIsPersist' },
+
+            success: function(customer) {
+                $(ctl).parents("tr").remove();
+            },
+            error: function(request, message, error) {
+                handleException(request, message, error);
+            }
+        });
+    }
+
+    // Clear form fields
+    function formClear() {
+        $("#firstname").val("");
+        $("#lastname").val("");
+        $("#email").val("");
+        $("#phoneNumber").val("");
+        $("#status").val("");
+    }
+
+    // Handle exceptions from AJAX calls
+    function handleException(request, message, error) {
+        var msg = "";
+
+        msg += "Code: " + request.status + "\n";
+        msg += "Text: " + request.statusText + "\n";
+        if (request.responseJSON != null) {
+            msg += "Message" + request.responseJSON.Message + "\n";
+        }
+
+        alert(msg);
+    }
+</script>
+</body>
+</html>

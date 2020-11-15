@@ -1,0 +1,69 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Contact Information</title>
+    <link href="../Content/bootstrap.css" rel="stylesheet" />
+
+    <script src="../Scripts/jquery-3.0.0.min.js"></script>
+    <script src="../Scripts/bootstrap.js"></script>
+    <script src="../Scripts/bootstrap.min.js"></script>
+    <script src="../Services/SearchService.js"></script>
+</head>
+<body>
+    <input type="hidden" id="customerid" value="0" />
+<div class="container">
+    <nav class="navbar navbar-expand-md navbar-light bg-light">
+        <a class="nav-item nav-link active" href="AllCustomers.html">All Customers</a>
+        <a class="nav-item nav-link" href="SearchPage.html">Search</a>
+        <a class="nav-item nav-link" href="AddCustomer.html">Add/Update Customer</a>
+    </nav>
+    <div class="row">
+        <div class="col-sm-6">
+            <h2>Search customer</h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="panel panel-primary">                
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label for="firstname">
+                            Enter Search Text(First Name)
+                        </label>
+                        <input type="text"
+                               class="form-control"
+                               id="firstname"/>
+                    </div>
+                    <div class="col-xs-12">
+                        <button type="button" id="searchButton"
+                                class="btn btn-primary"
+                                onclick="searchClick();">
+                            Search
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="panel-heading">
+                Customer Information Based on Search Text
+            </div>
+            <table id="CustomerTable"
+                   class="table table-bordered table-condensed table-striped">
+                <thead>
+                <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Phone Number</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>   
+</body>
+</html>
